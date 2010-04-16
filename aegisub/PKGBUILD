@@ -1,0 +1,34 @@
+# Contributor: G_Syme <demichan(at)mail(dot)upb(dot)de>
+# Contributor: whaevr <whaevr(at)archlinux(dot)us>
+pkgname=aegisub
+pkgver=2.1.8_dev_r3362
+pkgrel=1
+pkgdesc="A general-purpose subtitle editor with ASS/SSA support"
+arch=('i686' 'x86_64')
+url="http://www.aegisub.net"
+license=('GPL' 'BSD')
+depends=('intltool' 'ffmpeg>=0.5' 'hunspell' 'lua' 'openal' 'wxgtk>=2.8.1')
+makedepends=()
+optdepends=('asa: for subtitle rendering'
+            'libass: for subtitle rendering')
+options=(!libtool)
+source=("http://www.mahou.org/~verm/aegisub/$pkgname-${pkgver//_/-}.tar.gz" \
+        license.txt)
+md5sums=('40061cb67defca24d3c2b7901685b891'
+         '3e13350007702bd7117e8f35bac376f1')
+
+build() {
+  cd "$srcdir/$pkgname-${pkgver//_/-}"
+
+  ./configure --prefix=/usr --without-portaudio \
+      --with-provider-video=ffmpeg \
+      --with-provider-audio=ffmpeg \
+      --with-player-audio=openal || return 1
+  make || return 1
+  make DESTDIR="$pkgdir/" install
+
+  # install the BSD license, although it is ruled by GPL according to the wiki:
+  # (http://www.malakith.net/aegiwiki/Subtitling_software_comparison)
+  install -D -m644 "$srcdir"/license.txt \
+      "$pkgdir"/usr/share/licenses/$pkgname/license.txt
+}
